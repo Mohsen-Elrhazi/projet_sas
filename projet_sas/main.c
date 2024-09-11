@@ -200,6 +200,7 @@ void AfficherEtudiantsParDepartement(Etudiant *e,int n,char *depart){
     }
 }
 /*-----------Trie par choix-----------*/
+
 /*
 void trie(Etudiant *c, int n) {
     Etudiant Temp;
@@ -223,7 +224,7 @@ void trie(Etudiant *c, int n) {
             int comparer = 0;
 
             if (choix == 1) {
-                comparer = strcasecmp(p1->nom, p2->nom);
+                comparer = strcasecmp(p1->nom, p2->nom)>0;
             } else if (choix == 2) {
                 if (p1->noteGenerale < p2->noteGenerale) {
                     comparer = 1;
@@ -244,6 +245,62 @@ void trie(Etudiant *c, int n) {
     printf("Les etudiant ont ete tries.\n");
 }
 */
+void trieEtudiantPar(Etudiant *e, int n) {
+    Etudiant temp;
+    int choix;
+
+    if (n == 0) {
+        printf("Aucun etudiant inscrit.\n");
+        return;
+    }
+
+    printf("1: Tri des etudiants par nom\n");
+    printf("2: Tri des etudiants par moyenne generale\n");
+    printf("3: Tri des etudiants selon leur statut de reussite\n");
+    printf("Entrer votre choix de tri: ");
+    scanf("%d", &choix);
+
+    if (choix < 1 || choix > 3) {
+        printf("Le type de choix est incorrect.\n");
+        return;
+    }
+
+    for (p1 = e; p1 < e + (n - 1); p1++) {
+        for (p2 = p1 + 1; p2 < e + n; p2++) {
+            int comparer = 0;
+
+            if (choix == 1) {
+                // Tri alphabétique par nom
+                if (strcmp(p1->nom, p2->nom) > 0) {
+                    comparer = 1;
+                }
+            } else if (choix == 2) {
+                // Tri par moyenne générale
+                if (p1->noteGenerale < p2->noteGenerale) {
+                    comparer = 1;
+                } else if (p1->noteGenerale > p2->noteGenerale) {
+                    comparer = -1;
+                }
+            } else if (choix == 3) {
+                // Tri selon le statut de réussite
+                // Les étudiants ayant une moyenne >= 10 doivent venir en premier
+                if (p1->noteGenerale < 10 && p2->noteGenerale >= 10) {
+                    comparer = 1;
+                } else if (p1->noteGenerale >= 10 && p2->noteGenerale < 10) {
+                    comparer = -1;
+                }
+            }
+
+            if (comparer > 0) {
+                temp = *p1;
+                *p1 = *p2;
+                *p2 = temp;
+            }
+        }
+    }
+
+    printf("Les etudiants ont ete tries.\n");
+}
 
 
 /* ------------stastiques------------*/
@@ -251,6 +308,7 @@ void trie(Etudiant *c, int n) {
 void afficherTotalEtudiants(int *n){
     printf("Nombre total d'etudiants inscrits: %d\n",*n);
 }
+
 
 void afficherEtudiantsAuDessusSeuil(Etudiant *e, int *n, float seuil){
   int trv=0;
@@ -431,7 +489,8 @@ while(1){
         printf("10. Afficher les étudiants ayant une note supérieure à un certain seuil\n");
         printf("11. Afficher les 3 etudiants ayant les meilleures notes\n");
         printf("12. Afficher le nombre d'étudiants ayant réussi dans chaque département\n");
-    printf("13:Quitter le programme\n");
+    printf("13:Trier etudiant par\n");
+     printf("14:Quitter le programme\n");
     printf("entrer votre choix: ");
     scanf("%d",&choix);
     printf("-------------------------------\n");
@@ -488,7 +547,9 @@ while(1){
           break;
           case 12:afficherNombreReussiteParDepartement(e,&n);
           break;
-          case 13: printf("---------------Fin de programme1 !--------------- ");
+          case 13:trieEtudiantPar(e,n);
+          break;
+          case 14: printf("---------------Fin de programme1 !--------------- ");
              free(e);
           return 0;
           break;
