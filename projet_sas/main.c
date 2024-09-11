@@ -25,6 +25,7 @@ int choix,n;
 float somme[100];
 float *s=&somme;
 char nom[20];
+char departement[20];
 
 /*-----------Ajouter un etudiant-----------*/
 void Ajouter(Etudiant *e,int n){
@@ -58,7 +59,7 @@ void Afficher(Etudiant *e,int *n){
     printf("Date naissance: %d/%d/%d\n",p->naissance.jour,p->naissance.mois,p->naissance.annee);
     printf("Departement: %s\n",p->departement);
     printf("Note generale : %.2f\n",p->noteGenerale);
-    printf("------------------------------");
+    printf("\n------------------------------");
      }
     }
 }
@@ -121,7 +122,7 @@ void calcMoyenne(Etudiant *e,int *n){
 }
 
 /*-----------Rechercher etudiant par son nom-----------*/
-void rechercherEtud(Etudiant *e,int *n,char *nom){
+void RechercherEtudiantParNom(Etudiant *e,int *n,char *nom){
     for(p=e;p<e+ *n;p++){
         if(strcasecmp(p->nom,nom)==0){
            // Afficher(e,1);
@@ -132,11 +133,79 @@ void rechercherEtud(Etudiant *e,int *n,char *nom){
             printf("Date naissance: %d/%d/%d\n",p->naissance.jour,p->naissance.mois,p->naissance.annee);
             printf("Departement: %s\n",p->departement);
             printf("Note generale : %.2f\n",p->noteGenerale);
-            return ;
+            // return ;
         }
     }
     printf("l'etudiant n'a pas ete trouve.\n");
 }
+
+/*-----------Afficher la liste des étudiants inscrits dans un département spécifique-----------*/
+void AfficherEtudiantsParDepartement(Etudiant *e,int n,char *depart){
+    int nbretu=0;
+    printf("Les étudiants inscrits dans le département %s sont:\n", depart);
+    for(p=e;p<e+n;p++){
+        if(strcasecmp(p->departement,depart)==0){
+                if(nbretu=0){
+                    printf("Les etudiants inscrits dans le departement %s sont:\n", departement);
+                }
+            printf("les infos d'etu %d:\n",(p-e)+1);
+            printf("Numero: %d\n",p->numero);
+            printf("Nom: %s\n",p->nom);
+            printf("Prenom: %s\n",p->prenom);
+            printf("Date naissance: %d/%d/%d\n",p->naissance.jour,p->naissance.mois,p->naissance.annee);
+            printf("Departement: %s\n",p->departement);
+            printf("Note generale : %.2f\n",p->noteGenerale);
+            nbretu++;
+        }
+    }
+    if(nbretu==0){
+    printf("aucun etudiant inscris dans cette departement: %s\n",departement);
+    }
+}
+/*-----------Trie par choix-----------*/
+void trie(Etudiant *c, int n) {
+    Etudiant Temp;
+    if(n==0){
+        printf("Aucun etudiant inscris.\n");
+        return ;
+    }
+     printf("1:Trie des etudiants par nom\n");
+    printf("2:Trie des etudiants par moyenne generale\n");
+    printf("3:Tri des étudiants selon leur statut de réussite (ceux ayant une moyenne supérieure ou égale à 10/20)\n");
+    printf("Entrer votre choix de trie: ");
+    scanf("%d",&choix);
+
+     if (choix < 1 || choix > 3) {
+        printf("Le type de choix est incorrect.\n");
+        return;
+    }
+
+    for ( p1 = c; p1 < c + (n - 1); p1++) {
+        for ( p2 = p1 + 1; p2 < c + n; p2++) {
+            int comparer = 0;
+
+            if (choix == 1) {
+                comparer = strcasecmp(p1->nom, p2->nom);
+            } else if (choix == 2) {
+                if (p1->noteGenerale < p2->noteGenerale) {
+                    comparer = 1;
+                } else if (p1->noteGenerale > p2->noteGenerale) {
+                    comparer = -1;
+                }
+            } else if (choix == 3) {
+                comparer = ;
+            }
+
+            if (comparer > 0) {
+                help = *p1;
+                *p1 = *p2;
+                *p2 = help;
+            }
+        }
+    }
+    printf("Les etudiant ont ete tries.\n");
+}
+
 
 int main()
 {
@@ -148,8 +217,8 @@ while(1){
     printf("2:afficher les etudiants \n");
     printf("3:modifier un etudiant\n");
     printf("4:Supprimer un etudiant\n");
-    printf("5:Rechercher etudiant\n");
-    printf("6:Trier les Contacts\n");
+    printf("5:Rechercher un étudiant par son nom\n");
+    printf("6:Afficher la liste des étudiants inscrits dans un département spécifique\n");
     printf("7:Quitter le programme\n");
     printf("entrer votre choix: ");
     scanf("%d",&choix);
@@ -178,9 +247,11 @@ while(1){
        break;
     case 5: printf("entrer le nom d'etudiant a rechercher: ");
     scanf("%s",&nom);
-        rechercherEtud(e,&n,&nom);
+        RechercherEtudiantParNom(e,&n,&nom);
        break;
-    case 6:calcMoyenne(e,&n);
+    case 6: printf("Entrer  le nom du département que souhaite consulter les etudiants: ");
+            scanf("%s",departement);
+            AfficherEtudiantsParDepartement(e,n,&departement);
        break;
     case 7: printf("---------------Fin de programme1 !--------------- ");
           return 0;
