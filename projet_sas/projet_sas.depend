@@ -1,6 +1,7 @@
 # depslib dependency file v1.0
-1726018405 source:c:\users\mohse\desktop\projet_sas\projet_sas\main.c
+1726058984 source:c:\users\mohse\desktop\projet_sas\projet_sas\main.c
 	<stdio.h>
+	<stdlib.h>
 	<string.h>
 	<ctype.h>
 	"etudiant.h"
