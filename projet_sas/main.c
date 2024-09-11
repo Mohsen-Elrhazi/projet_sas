@@ -8,6 +8,7 @@
 
 #define MAX_DEPARTEMENTS 100
 #define TAILLE_DEPARTEMENT 50
+#define MAX_NOM_DEPARTEMENT 50
 
 
 typedef struct Date {
@@ -25,29 +26,30 @@ typedef struct Etudiant {
     float noteGenerale;
 }Etudiant;
 
-Etudiant *e;
+Etudiant *e=NULL;
+int n = 0;
 Etudiant *p,*p1,*p2;
 int num;
-int choix,n;
+int choix;
 
 char nom[20];
 char departement[20];
 float seuil;
 
 /*-----------Ajouter un etudiant-----------*/
-void Ajouter(Etudiant *e,int n){
-     p = e + (n - 1);
-     printf("Entrer les infos d'etu %d:\n",(p-e)+1);
+void Ajouter(Etudiant *e,int *n){
+     p = e + (*n - 1);
+     printf("Entrer les infos d'etu %d:\n",*n);
     printf("Entrer le numero: ");
     scanf("%d",&p->numero);
     printf("Entrer le nom: ");
-    scanf("%s",&p->nom);
+    scanf("%s",p->nom);
     printf("Entrer le prenom: ");
-    scanf("%s",&p->prenom);
+    scanf("%s",p->prenom);
     printf("entrer la date naissance: ");
     scanf("%d%d%d",&p->naissance.jour,&p->naissance.mois,&p->naissance.annee);
     printf("Entrer la departement: ");
-    scanf("%s",&p->departement);
+    scanf("%s",p->departement);
     printf("Entrer la note generale : ");
     scanf("%f",&p->noteGenerale);
 }
@@ -194,7 +196,7 @@ void AfficherEtudiantsParDepartement(Etudiant *e,int n,char *depart){
         }
     }
     if(nbretu==0){
-    printf("aucun etudiant inscris dans cette departement: %s\n",departement);
+    printf("Aucun etudiant inscris dans cette departement: %s\n",departement);
     }
 }
 /*-----------Trie par choix-----------*/
@@ -322,20 +324,32 @@ void afficherNombreReussiteParDepartement(Etudiant *e, int *n) {
 
 /*-------Afficher les 3 étudiants ayant les meilleures notes------*/
 
-void afficherTop3Etudiants(Etudiant *e, int *n) {
+ void afficherTop3Etudiants(Etudiant *e, int *n) {
     if (*n == 0) {
         printf("Aucun étudiant disponible.\n");
         return;
     }
     Etudiant temp ;
+    int i;
+
+     // Tableau pour stocker les indices originaux avant le tri
+     int indicesOriginaux[*n];
+     for (i = 0; i < *n; i++) {
+        indicesOriginaux[i] = i + 1;  // On stocke les indices originaux (1-based)
+    }
 
     // Trier les étudiants par note générale en ordre décroissant
-    for (p=e;p<e+ *n;p++) {
-        for (p1=p+1; p1 < *n; p1++) {
+    for (p=e;p<e+ (*n-1);p++) {
+        for (p1=p+1; p1 <e+ *n; p1++) {
             if (p->noteGenerale<p1->noteGenerale) {
                  temp = *p;
                 *p = *p1;
                 *p1 = temp;
+
+                 // Échanger aussi leurs indices originaux
+                int tempIndice = indicesOriginaux[p - e];
+                indicesOriginaux[p - e] = indicesOriginaux[p1 - e];
+                indicesOriginaux[p1 - e] = tempIndice;
             }
         }
     }
@@ -346,19 +360,56 @@ void afficherTop3Etudiants(Etudiant *e, int *n) {
         limite = 3; // Afficher seulement les 3 meilleurs
     }
 
-    printf("Les 3 etudiants ayant les meilleures notes :\n");
-    for (p=e; p<e+limite;p++) {
-        printf("Les infos d'etudiant %d:\n", (p-e)+1);
+   printf("Les 3 étudiants ayant les meilleures notes :\n");
+    for (i = 0; i < limite; i++) {
+        p = e + i; // Pointer sur le premier etudiant
+        printf("Les infos d'etudiant %d:\n", indicesOriginaux[i]);
         printf("Numero: %d\n", p->numero);
         printf("Nom: %s\n", p->nom);
         printf("Prenom: %s\n", p->prenom);
         printf("Date de naissance: %d/%d/%d\n", p->naissance.jour, p->naissance.mois, p->naissance.annee);
         printf("Departement: %s\n", p->departement);
-        printf("Note genrale : %.2f\n", p->noteGenerale);
+        printf("Note generale : %.2f\n", p->noteGenerale);
         printf("\n------------------------------\n");
+}
+ }
+
+
+ /*-------9. Afficher le nombre d'étudiants dans chaque département------*/
+void compteEtudiantsDepartements(Etudiant *e, int *n) {
+    if (*n == 0) {
+        printf("Aucun etudiant disponible.\n");
+        return;
+    }
+
+    int count[MAX_DEPARTEMENTS] = {0}; // Tableau pour compter les étudiants par département
+    char departements[MAX_DEPARTEMENTS][MAX_NOM_DEPARTEMENT]; // Tableau pour stocker les noms des départements
+    int num_departements = 0;
+
+    // Compter le nombre d'étudiants dans chaque département
+    for (p = e; p < e + *n; p++) {
+        int j;
+        int trv = 0;
+        for (j = 0; j < num_departements; j++) {
+            if (strcmp(p->departement, departements[j]) == 0) {
+                count[j]++;
+                trv = 1;
+                break;
+            }
+        }
+        if (!trv) {
+            strcpy(departements[num_departements], p->departement);
+            count[num_departements]++;
+            num_departements++;
+        }
+    }
+
+    // Afficher les résultats
+    printf("Nombre d'etudiants dans chaque departement :\n");
+    for (int i = 0; i < num_departements; i++) {
+        printf("Departement: %s, Nombre d'etudiants: %d\n", departements[i], count[i]);
     }
 }
-
 
 
 int main()
@@ -373,12 +424,12 @@ while(1){
     printf("4:Supprimer un etudiant\n");
     printf("5:Rechercher un étudiant par son nom\n");
     printf("6:Afficher la liste des étudiants inscrits dans un département spécifique\n");
-    printf("7:Claculer la moyenne de generale de chaque departement\n");
+    printf("7:Claculer la moyenne de generale de chaque departement et de l’universite entiere.\n");
     printf("\n--------Menu Statistiques--------\n");
         printf("8. Afficher le nombre total d'étudiants inscrits\n");
         printf("9. Afficher le nombre d'étudiants dans chaque département\n");
         printf("10. Afficher les étudiants ayant une note supérieure à un certain seuil\n");
-        printf("11. Afficher les 3 étudiants ayant les meilleures notes\n");
+        printf("11. Afficher les 3 etudiants ayant les meilleures notes\n");
         printf("12. Afficher le nombre d'étudiants ayant réussi dans chaque département\n");
     printf("13:Quitter le programme\n");
     printf("entrer votre choix: ");
@@ -386,15 +437,20 @@ while(1){
     printf("-------------------------------\n");
     switch(choix){
     case 1:
-        if (n==0){
-        e=calloc(n=1,sizeof(Etudiant));
-        Ajouter(e,n);
+        /*
+        if (*n==0){
+        *n=1;
+        e=calloc(*n,sizeof(Etudiant));
         }
         else {
-        n+=1;
-            e=realloc(e,n*sizeof(Etudiant));
-            Ajouter(e,n);
+        (*n)++;
+            e=realloc(e,(*n)*sizeof(Etudiant));
         }
+        Ajouter(e,n);
+        */
+         n++;
+                e = realloc(e, n * sizeof(Etudiant));
+                Ajouter(e, &n);
        break;
     case 2:Afficher(e,&n);
        break;
@@ -418,7 +474,7 @@ while(1){
           break;
           case 8: afficherTotalEtudiants(&n);
           break;
-          case 9:
+          case 9:compteEtudiantsDepartements(e,&n);
           break;
           case 10: if(n==0){
                     printf("Aucun etudiant disponible.\n");
@@ -433,12 +489,13 @@ while(1){
           case 12:afficherNombreReussiteParDepartement(e,&n);
           break;
           case 13: printf("---------------Fin de programme1 !--------------- ");
+             free(e);
           return 0;
           break;
     default : printf("le type de choix est incorrect\n");
        break;
     }
     }
-    free(e);
+   // free(e);
     return 0;
 }
